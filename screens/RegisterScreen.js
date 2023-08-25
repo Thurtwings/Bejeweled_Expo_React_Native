@@ -1,34 +1,37 @@
-import React, {useEffect, useState} from 'react';
-import { StyleSheet, View, TextInput, Button, Alert, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, TextInput, Alert, TouchableOpacity, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import {authenticateUser} from '../Utilities/DatabaseOperations';
+import { registerUser } from '../Utilities/DatabaseOperations';
 
-const LoginScreen = ({ navigation }) => {
+const RegisterScreen = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
-    const handleLogin = () => {
-
-
-        if (!username || !password) {
-            Alert.alert('Error', 'Merci de remplir les deux champs.');
+    const handleRegister = () => {
+        console.log("Register button pressed");
+        if (!username || !password || !confirmPassword) {
+            Alert.alert('Error', 'Please fill in all fields.');
             return;
         }
-
-        authenticateUser(username, password, (success, message) => {
+        if (password !== confirmPassword) {
+            Alert.alert('Error', 'Passwords do not match.');
+            return;
+        }
+        registerUser(username, password, (success, message) => {
             if (success) {
-
-                navigation.navigate('Game', { username });
+                Alert.alert('Success', 'Registration successful. Please login.', [
+                    {text: 'OK', onPress: () => navigation.navigate('Login')}
+                ]);
             } else {
-                Alert.alert('Connection ratée', message);
+                Alert.alert('Registration Failed', message);
             }
         });
-    };
-
+    }
 
     return (
         <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']} style={styles.container}>
-            <Text style={styles.title}>Welcome!</Text>
+            <Text style={styles.title}>Register for Game</Text>
 
             <TextInput
                 style={styles.input}
@@ -43,18 +46,20 @@ const LoginScreen = ({ navigation }) => {
                 onChangeText={setPassword}
                 secureTextEntry
             />
+            <TextInput
+                style={styles.input}
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+            />
 
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Login</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.text}>No account yet?</Text>
-            <TouchableOpacity style={[styles.button, styles.registerButton]} onPress={() => navigation.navigate('Register')}>
+            <TouchableOpacity style={styles.button} onPress={handleRegister}>
                 <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
         </LinearGradient>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -87,25 +92,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#DDDDDD',
         padding: 10,
         borderRadius: 25,
-        marginBottom: 10,
+        marginTop: 20,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
     },
-    registerButton: {
-        backgroundColor: '#DDDDDD',
-    },
     buttonText: {
         fontSize: 16,
         color: 'black',
-        fontWeight: "bold"
-    },
-    text: {
-        textAlign: 'center',
-        color: 'white',
-        marginBottom: 10,
     }
 });
 
-export default LoginScreen;
+export default RegisterScreen;
